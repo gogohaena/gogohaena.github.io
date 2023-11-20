@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>100*100 Note PDF Generator</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.8/pdfmake.js" integrity="sha512-tpEbr2VUgOeMfDSUi+aR/V+cfrL29LuX7JjyUv1afwYY0V/Uh4J5DGmB9W0selJAJl5c2IryQbJz8JuCKWxzWw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pdfmake-unicode@0.0.1/dist/pdfmake-unicode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.8/vfs_fonts.js" integrity="sha512-nNkHPz+lD0Wf0eFGO0ZDxr+lWiFalFutgVeGkPdVgrG4eXDYUnhfEj9Zmg1QkrJFLC0tGs8ZExyU/1mjs4j93w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+<body class="bg-light">
+
+<div class="container mt-5">
+    <form id="pdfForm">
+        <div class="form-group">
+            <label for="goal">Goal (sentence):</label>
+            <input type="text" class="form-control" id="goal" name="goal" required>
+        </div>
+        <div class="form-group">
+            <label for="startDate">Start Date (YYYY-MM-DD):</label>
+            <input type="text" class="form-control" id="startDate" name="startDate" placeholder="YYYY-MM-DD" required>
+        </div>
+        <button type="button" class="btn btn-primary" onclick="createNotePDF()">Generate PDF</button>
+    </form>
+</div>
+
+<script>
+    function createNotePDF() {
+        // Get user input
+        var goal = document.getElementById("goal").value;
+        var startDateStr = document.getElementById("startDate").value;
+        var startDate = new Date(startDateStr);
+
+        // Calculate end date (start_date + 100 days)
+        var endDate = new Date(startDate);
+        endDate.setDate(startDate.getDate() + 100);
+
+        // Register Noto Sans KR font
+        pdfMake.fonts = {
+            NotoSansKR: {
+                normal: `https://cdn.jsdelivr.net/npm/@expo-google-fonts/noto-sans-kr@0.2.3/NotoSansKR_400Regular.ttf`,
+                bold: `https://cdn.jsdelivr.net/npm/@expo-google-fonts/noto-sans-kr@0.2.3/NotoSansKR_700Bold.ttf`,
+                italics: `https://cdn.jsdelivr.net/npm/@expo-google-fonts/noto-sans-kr@0.2.3/NotoSansKR_400Regular.ttf`,
+                bolditalics: `https://cdn.jsdelivr.net/npm/@expo-google-fonts/noto-sans-kr@0.2.3/NotoSansKR_700Bold.ttf`
+            }
+        };
+
+        // Create PDF without specifying fonts (default UTF-8 support)
+        var docDefinition = {
+            defaultStyle: {
+                font: 'NotoSansKR', // use your font name here
+            },
+            content: [
+                { text: `100 * 100 Note`, bold: true, fontSize: 50, alignment: 'center', margin: [0, 130, 0, 70], color: '#ffffff' },
+                { text: `${goal}`, font: 'NotoSansKR', fontSize: 24, alignment: 'center', margin: [40, 0, 40, 200], color: '#ffffff' },
+                { text: `Start Date: ${startDate.toLocaleDateString()}`, fontSize: 20, alignment: 'right', margin: [40, 0, 40, 15], color: '#ffffff' },
+                { text: `End Date: ${endDate.toLocaleDateString()}`, fontSize: 20, alignment: 'right', margin: [40, 0, 40, 15], color: '#ffffff' },
+                { text: '', pageBreak: 'before' } // Page break for the next content
+            ],
+            pageSize: 'letter',
+            pageMargins: [30, 17, 30, 13],
+            styles: {
+                lineSpacing: 11,
+                cover: {
+                    fillColor: '#9d8ad1', // Pastel tone sky blue background color
+                },
+                content: {
+                    color: '#808080', // Grey text color
+                },
+            },
+            background: function (currentPage, pageSize) {
+                if (currentPage === 1) {
+                    return {
+                        canvas: [
+                            {
+                                type: 'rect',
+                                x: 0,
+                                y: 0,
+                                w: pageSize.width,
+                                h: pageSize.height,
+                                color: '#9d8ad1', // Pastel tone sky blue background color
+                            }
+                        ]
+                    };
+                }
+            },
+        };
+
+        // Add note pages with underlines for 100 lines each
+        myDate = new Date(startDate);
+        for (var i = 1; i <= 100; i++) {
+            myDate.setDate(myDate.getDate() + 1);
+            docDefinition.content.push(
+                { text: [{ text: `Day ${i}`, bold: true }, `    ${myDate.toLocaleDateString()}`], alignment: 'right', margin: [0, 0, 0, 11], fontSize: 11 }
+            );
+
+            // Underline for 100 lines
+            for (var j = 1; j <= 100; j++) {
+                docDefinition.content.push(
+                    { text: `${j}. ` + Array(j < 10 ? 90 : j < 100 ? 89 : 88).fill('_').join(''), fontSize: 10.6, margin: [0, 0, 0, 7.1], style: 'content' }
+                );
+            }
+
+            docDefinition.content.push(
+                { text: 'success :)', alignment: 'right', margin: [0, 0, 0, 0], fontSize: 8, style: 'content' }
+            );
+
+            if (i < 100) {
+                docDefinition.content.push({ text: '', pageBreak: 'before' }); // Page break for the next content
+            }
+        }
+
+        // Generate and download the PDF
+        pdfMake.createPdf(docDefinition).download(`Note.pdf`);
+    }
+</script>
+
+<!-- Bootstrap JS and Popper.js -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+</body>
+</html>
