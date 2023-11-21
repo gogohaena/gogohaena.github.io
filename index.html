@@ -33,9 +33,9 @@
         var startDateStr = document.getElementById("startDate").value;
         var startDate = new Date(startDateStr);
 
-        // Calculate end date (start_date + 100 days)
+        // Calculate end date (100 days)
         var endDate = new Date(startDate);
-        endDate.setDate(startDate.getDate() + 100);
+        endDate.setDate(startDate.getDate() + 99);
 
         // Register Noto Sans KR font
         pdfMake.fonts = {
