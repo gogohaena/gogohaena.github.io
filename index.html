@@ -91,7 +91,7 @@
         // Add note pages with underlines for 100 lines each
         myDate = new Date(startDate);
         for (var i = 1; i <= 100; i++) {
-            if (i > 1) {
+            if (i != 1) {
                 myDate.setDate(myDate.getDate() + 1);
             }
             docDefinition.content.push(
